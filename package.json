@@ -1,0 +1,34 @@
+{
+  "name": "ask-my-cv",
+  "version": "1.0.0",
+  "description": "Résumé assistant that answers recruiters' questions from your CV only: evals, guardrails and cost limits, deployable to AWS with Terraform.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:site": "node scripts/site.mjs",
+    "dev": "node --import tsx --import ./scripts/register-md.mjs scripts/dev.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "eval": "node --import tsx --import ./scripts/register-md.mjs evals/run.ts",
+    "ask": "node --import tsx --import ./scripts/register-md.mjs scripts/ask.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/bedrock-sdk": "^0.34.4",
+    "@anthropic-ai/sdk": "^0.133.0",
+    "@aws-sdk/client-dynamodb": "^3.700.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145",
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "license": "MIT",
+  "author": "Kamil Popczyk",
+  "private": true
+}

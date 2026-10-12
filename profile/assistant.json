@@ -1,0 +1,15 @@
+{
+  "name": "Alex Novak",
+  "headline": "Senior Backend Engineer · payments and event-driven systems · Kraków, open to remote",
+  "contact": { "label": "LinkedIn", "url": "https://www.linkedin.com/in/example" },
+  "links": [{ "label": "GitHub", "url": "https://github.com/example" }],
+  "languages": ["English", "Polish"],
+  "confidential": "Ledgerline's internal systems, clients, incidents, transaction volumes, team structure and metrics",
+  "suggestions": [
+    "What does Alex work on at Ledgerline?",
+    "Has she worked with Kubernetes?",
+    "What did she build at Parcelo?",
+    "Czym zajmuje się Alex?"
+  ],
+  "sourceUrl": "https://github.com/bypopdev/ask-my-cv"
+}
