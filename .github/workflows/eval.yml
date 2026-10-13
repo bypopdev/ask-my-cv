@@ -1,0 +1,57 @@
+name: Eval
+
+# Runs the eval suite against the real model whenever the prompt, the profile or the evals change.
+on:
+  workflow_dispatch:
+    inputs:
+      judge:
+        description: Use the LLM judge
+        type: boolean
+        default: true
+  pull_request:
+    paths: [profile/**, src/prompt.ts, src/assistant.ts, evals/**]
+  push:
+    branches: [main]
+    paths: [profile/**, src/prompt.ts, src/assistant.ts, evals/**]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: eval-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    # Bedrock needs the OIDC role; LLM_PROVIDER=anthropic needs only the ANTHROPIC_API_KEY secret.
+    if: vars.AWS_EVAL_ROLE_ARN != '' || vars.LLM_PROVIDER == 'anthropic'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: vars.LLM_PROVIDER != 'anthropic'
+        with:
+          role-to-assume: ${{ vars.AWS_EVAL_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'eu-central-1' }}
+      - name: Run evals
+        run: npm run eval -- ${{ (github.event_name == 'workflow_dispatch' && !inputs.judge) && '--no-judge' || '' }}
+        env:
+          BEDROCK_REGION: ${{ vars.BEDROCK_REGION || 'eu-central-1' }}
+          MODEL_ID: ${{ vars.MODEL_ID || 'anthropic.claude-haiku-5-5' }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'bedrock' }}
+          ANTHROPIC_API_KEY: ${{ vars.LLM_PROVIDER == 'anthropic' && secrets.ANTHROPIC_API_KEY || '' }}
+          ANTHROPIC_MODEL_ID: ${{ vars.ANTHROPIC_MODEL_ID || 'claude-haiku-5-5' }}
+          # Empty = the runner picks the Sonnet id that matches LLM_PROVIDER.
+          JUDGE_MODEL_ID: ${{ vars.JUDGE_MODEL_ID }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-results
+          path: evals/results/
